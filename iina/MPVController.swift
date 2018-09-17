@@ -671,10 +671,8 @@ class MPVController: NSObject {
       break
     }
 
-    let eventName = String(cString: mpv_event_name(eventId))
-    if let listeners = player.pluginMPVEventListeners[eventName] {
-      listeners.forEach { $0.call() }
-    }
+    let eventName = "mpv.\(String(cString: mpv_event_name(eventId)))"
+    player.events.emit(.init(eventName))
   }
 
   private func onVideoParamsChange (_ data: UnsafePointer<mpv_node_list>) {
@@ -940,7 +938,8 @@ class MPVController: NSObject {
       }
     }
 
-    if let listeners = player.pluginMPVPropertyListeners[name] {
+    let eventName = EventController.Name("mpv.\(name).changed")
+    if player.events.hasListener(for: eventName) {
       // FIXME: better convert to JSValue before passing to call()
       let data: Any
       switch property.format {
@@ -952,10 +951,10 @@ class MPVController: NSObject {
         data = property.data.bindMemory(to: Double.self, capacity: 1).pointee
       case MPV_FORMAT_STRING:
         data = property.data.bindMemory(to: String.self, capacity: 1).pointee
-      default:
+      default: 
         data = 0
       }
-      listeners.forEach { $0.call(data) }
+      player.events.emit(eventName, data: data)
     }
   }
 
