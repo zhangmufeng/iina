@@ -8,6 +8,7 @@
 
 import Cocoa
 import Mustache
+import WebKit
 
 fileprivate typealias PK = Preference.Key
 
@@ -543,6 +544,17 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
 
   @IBOutlet weak var pipOverlayView: NSVisualEffectView!
 
+  lazy var pluginOverlayView: PluginOverlayView! = {
+    guard let window = window, let cv = window.contentView else { return nil }
+    let webView = PluginOverlayView(frame: .zero)
+    webView.translatesAutoresizingMaskIntoConstraints = false
+    cv.addSubview(webView, positioned: .below, relativeTo: bufferIndicatorView)
+    Utility.quickConstraints(["H:|[v]|", "V:|[v]|"], ["v": webView])
+    webView.setValue(false, forKey: "drawsBackground")
+    webView.isHidden = true
+    return webView
+  }()
+
   lazy var subPopoverView = playlistView.subPopover?.contentViewController?.view
 
   var videoViewConstraints: [NSLayoutConstraint.Attribute: NSLayoutConstraint] = [:]
@@ -701,6 +713,8 @@ class MainWindowController: NSWindowController, NSWindowDelegate {
         self.player.togglePause(true)
       }
     })
+
+    player.events.emit(.windowLoaded)
   }
 
   deinit {
