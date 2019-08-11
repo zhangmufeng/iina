@@ -72,6 +72,7 @@ enum OSDMessage {
   case canceled
 
   case custom(String)
+  case customWithDetail(String, String)
 
   func message() -> (String, OSDType) {
     switch self {
@@ -301,6 +302,9 @@ enum OSDMessage {
 
     case .custom(let message):
       return (message, .normal)
+
+    case .customWithDetail(let message, let detail):
+      return (message, .withText(detail))
     }
   }
 }

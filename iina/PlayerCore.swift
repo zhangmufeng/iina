@@ -1315,10 +1315,10 @@ class PlayerCore: NSObject {
     }
   }
 
-  func sendOSD(_ osd: OSDMessage, autoHide: Bool = true, accessoryView: NSView? = nil) {
+  func sendOSD(_ osd: OSDMessage, autoHide: Bool = true, accessoryView: NSView? = nil, external: Bool = false) {
     // querying `mainWindow.isWindowLoaded` will initialize mainWindow unexpectly
     guard mainWindow.isWindowLoaded && Preference.bool(for: .enableOSD) else { return }
-    if info.disableOSDForFileLoading {
+    if info.disableOSDForFileLoading && !external {
       guard case .fileStart = osd else {
         return
       }
